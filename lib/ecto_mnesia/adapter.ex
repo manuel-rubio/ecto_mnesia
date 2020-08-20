@@ -1,6 +1,6 @@
 defmodule EctoMnesia.Adapter do
   @moduledoc """
-  Ecto 2.X adapter for Mnesia Erlang term database.
+  Ecto 3.X adapter for Mnesia Erlang term database.
 
   ## Run-Time Storage Options
 
@@ -40,20 +40,25 @@ defmodule EctoMnesia.Adapter do
   """
   # Adapter behavior
   @behaviour Ecto.Adapter
+  @behaviour Ecto.Adapter.Queryable
+  @behaviour Ecto.Adapter.Schema
   @adapter_implementation EctoMnesia.Planner
 
   @doc false
   defmacro __before_compile__(_env), do: :ok
 
   @doc false
+  defdelegate checkout(adapter_meta, config, function), to: @adapter_implementation
+
+  @doc false
   defdelegate ensure_all_started(repo, type), to: @adapter_implementation
   @doc false
-  defdelegate child_spec(repo, opts), to: @adapter_implementation
+  defdelegate init(config), to: @adapter_implementation
 
   @doc false
   defdelegate prepare(operation, query), to: @adapter_implementation
   @doc false
-  defdelegate execute(repo, query_meta, query_cache, sources, preprocess, opts), to: @adapter_implementation
+  defdelegate execute(adapter_meta, query_meta, query_cache, params, options), to: @adapter_implementation
   @doc false
   defdelegate insert(repo, query_meta, sources, on_conflict, returning, opts), to: @adapter_implementation
   @doc false
@@ -62,9 +67,10 @@ defmodule EctoMnesia.Adapter do
   defdelegate update(repo, query_meta, params, filter, autogen, opts), to: @adapter_implementation
   @doc false
   defdelegate delete(repo, query_meta, filter, opts), to: @adapter_implementation
+
   @doc false
-  def stream(_, _, _, _, _, _),
-    do: raise(ArgumentError, "stream/6 is not supported by adapter, use EctoMnesia.Table.Stream.new/2 instead")
+  def stream(_, _, _, _, _),
+    do: raise(ArgumentError, "stream/5 is not supported by adapter, use EctoMnesia.Table.Stream.new/2 instead")
 
   @doc false
   defdelegate transaction(repo, opts, fun), to: @adapter_implementation
@@ -83,14 +89,17 @@ defmodule EctoMnesia.Adapter do
   # Storage behaviour for migrations
   @behaviour Ecto.Adapter.Storage
   @storage_implementation EctoMnesia.Storage
-  @migrator_implementation EctoMnesia.Storage.Migrator
+  # @migrator_implementation EctoMnesia.Storage.Migrator
 
   @doc false
   defdelegate storage_up(config), to: @storage_implementation
   @doc false
   defdelegate storage_down(config), to: @storage_implementation
   @doc false
-  defdelegate execute_ddl(repo, ddl, opts), to: @migrator_implementation, as: :execute
+  defdelegate storage_status(config), to: @storage_implementation
+
+  # @doc false
+  # defdelegate execute_ddl(adapter_meta, ddl, opts), to: @migrator_implementation, as: :execute
   @doc false
   def supports_ddl_transaction?, do: false
 end

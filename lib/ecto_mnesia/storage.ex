@@ -81,6 +81,14 @@ defmodule EctoMnesia.Storage do
     )
   end
 
+  def storage_status(_config) do
+    path = List.to_string(:mnesia.system_info(:directory)) <> "/schema.DAT"
+    case File.exists?(path) do
+      true ->  :up
+      false -> :down
+    end
+  end
+
   @doc """
   Checks that the Application environment for `mnesia_dir` is of
   a correct type.
@@ -102,4 +110,5 @@ defmodule EctoMnesia.Storage do
         Logger.error("Mnesia dir is not character list. Mnesia will not work. ")
     end
   end
+
 end

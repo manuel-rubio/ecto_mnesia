@@ -1,7 +1,7 @@
 defmodule EctoMnesia.Mixfile do
   use Mix.Project
 
-  @version "0.9.0"
+  @version "0.10.0"
 
   def project do
     [
@@ -9,7 +9,7 @@ defmodule EctoMnesia.Mixfile do
       description: "Ecto adapter for Mnesia erlang term storage.",
       package: package(),
       version: @version,
-      elixir: "~> 1.6",
+      elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
@@ -49,7 +49,7 @@ defmodule EctoMnesia.Mixfile do
     [
       {:confex, "~> 3.3"},
       {:decimal, "~> 1.5"},
-      {:ecto, "~> 2.2.0"},
+      {:ecto, "~> 3.0"},
       {:ex_doc, "~> 0.18", only: [:dev, :test]},
       {:excoveralls, "~> 0.8", only: [:dev, :test]}
     ]
