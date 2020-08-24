@@ -42,6 +42,8 @@ defmodule EctoMnesia.Adapter do
   @behaviour Ecto.Adapter
   @behaviour Ecto.Adapter.Queryable
   @behaviour Ecto.Adapter.Schema
+  @behaviour Ecto.Adapter.Transaction
+
   @adapter_implementation EctoMnesia.Planner
 
   @doc false
