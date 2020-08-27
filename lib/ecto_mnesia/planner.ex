@@ -9,6 +9,9 @@ defmodule EctoMnesia.Planner do
   alias EctoMnesia.Connection
 
   @behaviour Ecto.Adapter
+  @behaviour Ecto.Adapter.Queryable
+  @behaviour Ecto.Adapter.Schema
+  @behaviour Ecto.Adapter.Transaction
 
   @required_apps [:mnesia]
 
@@ -45,7 +48,7 @@ defmodule EctoMnesia.Planner do
   def autogenerate(:embed_id), do: Ecto.UUID.generate()
   def autogenerate(:binary_id), do: Ecto.UUID.autogenerate()
 
-  @behaviour Ecto.Adapter.Queryable
+
   @doc """
   Prepares are called by Ecto before `execute/5` methods.
   """
