@@ -9,7 +9,8 @@ defmodule EctoMnesia.Storage do
 
   @defaults [
     host: {:system, :atom, "MNESIA_HOST", Kernel.node()},
-    storage_type: {:system, :atom, "MNESIA_STORAGE_TYPE", :disc_copies}
+    storage_type: {:system, :atom, "MNESIA_STORAGE_TYPE", :disc_copies},
+    all_hosts: {:system, :list, "ALL_MNESIA_HOSTS", [Kernel.node()]},
   ]
 
   @doc """
@@ -50,7 +51,7 @@ defmodule EctoMnesia.Storage do
 
     Logger.info("==> Ensuring Mnesia schema exists")
 
-    case Mnesia.create_schema([config[:host]]) do
+    case Mnesia.create_schema(config[:all_hosts]) do
       {:error, {_, {:already_exists, _}}} ->
         {:error, :already_up}
 
@@ -70,14 +71,15 @@ defmodule EctoMnesia.Storage do
     check_mnesia_dir()
     config = conf(config)
     stop()
-    Mnesia.delete_schema([config[:host]])
+    Mnesia.delete_schema(config[:all_hosts])
     start()
   end
 
   def conf(config \\ []) do
     Confex.Resolver.resolve!(
       host: config[:host] || @defaults[:host],
-      storage_type: config[:storage_type] || @defaults[:storage_type]
+      storage_type: config[:storage_type] || @defaults[:storage_type],
+      all_hosts: config[:all_hosts] || @defaults[:all_hosts],
     )
   end
 

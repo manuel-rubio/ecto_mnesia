@@ -7,7 +7,7 @@ Ecto 2.X adapter for Mnesia Erlang term database. In most cases it can be used a
 Supported features:
 
 - Compatible `Ecto.Repo` API.
-- Automatically converts `Ecto.Query` structs to Erlang `match_spec`. 
+- Automatically converts `Ecto.Query` structs to Erlang `match_spec`.
 - Emulated `query.select` and `query.order_bys`, `select .. in [..]`. (Emulating is slow for any large dataset, `O(n * log n)`.)
 - Auto-generated (via sequence table) `:id` primary keys.
 - Migrations and database setup via `Ecto.Migrations`.
@@ -51,7 +51,8 @@ Please, pick your tools wisely and think through how you would use them in produ
 ```elixir
 config :ecto_mnesia,
   host: {:system, :atom, "MNESIA_HOST", Kernel.node()},
-  storage_type: {:system, :atom, "MNESIA_STORAGE_TYPE", :disc_copies}
+  storage_type: {:system, :atom, "MNESIA_STORAGE_TYPE", :disc_copies},
+  all_hosts: {:system, :list, "ALL_MNESIA_HOSTS", [Kernel.node()]}
 
 config :mnesia,
   dir: 'priv/data/mnesia' # Make sure this directory exists

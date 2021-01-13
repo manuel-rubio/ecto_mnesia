@@ -4,9 +4,10 @@ defmodule EctoMnesia.Adapter do
 
   ## Run-Time Storage Options
 
-    * `:host` - Node hostname.
+    * `:host` - Current Node hostname.
     * `:dir` - Path where Mnesia should store DB data.
     * `:storage_type` - Type of Mnesia storage.
+    * `:all_hosts` - All nodes where Mnesia running
 
   ### Mnesia Storage Types
 

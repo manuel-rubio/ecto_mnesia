@@ -190,7 +190,7 @@ defmodule EctoMnesia.Storage.Migrator do
         attributes
       end
 
-    tab_def = [{:attributes, attributes}, {config[:storage_type], [config[:host]]}, {:type, get_engine(type)}]
+    tab_def = [{:attributes, attributes}, {config[:storage_type], config[:all_hosts]}, {:type, get_engine(type)}]
     table = if String.valid?(table), do: String.to_atom(table), else: table
 
     case Mnesia.create_table(table, tab_def) do
