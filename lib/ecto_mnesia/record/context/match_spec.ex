@@ -48,8 +48,9 @@ defmodule EctoMnesia.Record.Context.MatchSpec do
     Enum.map(select, &Context.find_field_placeholder!(&1, context))
   end
 
+  defp select_fields(%Ecto.Query.Tagged{} = tagged, sources), do: select_fields(tagged.value, sources)
   defp select_fields({:&, [], [0, fields, _]}, _sources), do: fields
-  defp select_fields({{:., [], [{:&, [], [0]}, field]}, _, []}, _sources), do: [field]
+  defp select_fields({{:., _type, [{:&, [], [0]}, field]}, _, []}, _sources), do: [field]
   defp select_fields({:^, [], [_]} = expr, sources), do: [unbind(expr, sources)]
 
   defp select_fields(exprs, sources) when is_list(exprs) do

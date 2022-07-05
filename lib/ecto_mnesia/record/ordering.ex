@@ -16,7 +16,7 @@ defmodule EctoMnesia.Record.Ordering do
     end
   end
 
-  defp sort([left], [right], ordering) do
+  defp sort(left, right, ordering) do
     cmp(left, right, join_exprs(ordering)) == :lt
   end
 
@@ -27,7 +27,7 @@ defmodule EctoMnesia.Record.Ordering do
   defp join_exprs([%{expr: exprs1}]), do: exprs1
 
   defp cmp(left, right, [{:asc, {{:., [], [{:&, [], [0]}, field]}, _, _}} | t]) do
-    case {Map.get(left, field), Map.get(right, field)} do
+    case {left[field], right[field]} do
       {l, r} when l < r ->
         :lt
 
@@ -40,7 +40,7 @@ defmodule EctoMnesia.Record.Ordering do
   end
 
   defp cmp(left, right, [{:desc, {{:., [], [{:&, [], [0]}, field]}, _, _}} | t]) do
-    case {Map.get(left, field), Map.get(right, field)} do
+    case {left[field], right[field]} do
       {l, r} when l < r ->
         :gt
 

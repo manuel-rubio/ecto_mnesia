@@ -86,11 +86,17 @@ defmodule EctoMnesia.Planner do
       "Selecting all records by match specification `#{inspect(match_spec)}` with limit #{inspect(limit)}"
     end)
 
+    {:ok, attributes} = Table.attributes(table)
     result =
       table
       |> Table.select(match_spec)
+      |> Enum.map(fn row ->
+        [attributes, row]
+        |> List.zip()
+      end)
       |> ordering_fn.()
       |> limit_fn.()
+      |> Enum.map(&Keyword.values/1)
 
     {length(result), result}
   end

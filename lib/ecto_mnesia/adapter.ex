@@ -113,7 +113,7 @@ defmodule EctoMnesia.Adapter do
   # Storage behaviour for migrations
   @behaviour Ecto.Adapter.Storage
   @storage_implementation EctoMnesia.Storage
-  # @migrator_implementation EctoMnesia.Storage.Migrator
+  @migrator_implementation EctoMnesia.Storage.Migrator
 
   @doc false
   @impl Ecto.Adapter.Storage
@@ -125,8 +125,11 @@ defmodule EctoMnesia.Adapter do
   @impl Ecto.Adapter.Storage
   defdelegate storage_status(config), to: @storage_implementation
 
-  # @doc false
-  # defdelegate execute_ddl(adapter_meta, ddl, opts), to: @migrator_implementation, as: :execute
+  @doc false
+  defdelegate execute_ddl(adapter_meta, ddl, opts), to: @migrator_implementation, as: :execute
+
   @doc false
   def supports_ddl_transaction?, do: false
+
+  defdelegate lock_for_migrations(adapter_meta, options, function), to: @migrator_implementation
 end
