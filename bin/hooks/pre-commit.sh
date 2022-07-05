@@ -1,2 +1,0 @@
-mix test
-mix coveralls

@@ -28,3 +28,4 @@ rel/*/
 tmp/
 priv/data/
 Mnesia.nonode@nohost/
+mnesia/

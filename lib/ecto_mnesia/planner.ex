@@ -15,12 +15,18 @@ defmodule EctoMnesia.Planner do
 
   @required_apps [:mnesia]
 
+  @impl Ecto.Adapter
   defmacro __before_compile__(_env), do: :ok
 
+  @impl Ecto.Adapter
   def checkout(_adapter_meta, _config, function) do
     function.()
   end
 
+  @impl Ecto.Adapter
+  def checked_out?(_adapter_meta), do: false
+
+  @impl Ecto.Adapter
   @doc """
   Ensure all applications necessary to run the adapter are started.
   """
@@ -32,15 +38,17 @@ defmodule EctoMnesia.Planner do
     {:ok, @required_apps}
   end
 
+  @impl Ecto.Adapter
   @doc """
   Returns the childspec that starts the adapter process.
   This method is called from `Ecto.Repo.Supervisor.init/2`.
   """
   def init(config) do
-    #{:ok, Supervisor.Spec.supervisor(Supervisor, [[], [strategy: :one_for_one]]), %{}}
+    # {:ok, Supervisor.Spec.supervisor(Supervisor, [[], [strategy: :one_for_one]]), %{}}
     {:ok, Connection.child_spec(config), %{}}
   end
 
+  @impl Ecto.Adapter.Schema
   @doc """
   Automatically generate next ID for binary keys, leave sequence keys empty for generation on insert.
   """
@@ -48,7 +56,7 @@ defmodule EctoMnesia.Planner do
   def autogenerate(:embed_id), do: Ecto.UUID.generate()
   def autogenerate(:binary_id), do: Ecto.UUID.autogenerate()
 
-
+  @impl Ecto.Adapter.Queryable
   @doc """
   Prepares are called by Ecto before `execute/5` methods.
   """
@@ -60,7 +68,8 @@ defmodule EctoMnesia.Planner do
     {:nocache, {operation, query, {limit, limit_fn}, context, ordering_fn}}
   end
 
-@doc """
+  @impl Ecto.Adapter.Queryable
+  @doc """
   Perform `mnesia:select` on prepared query and convert the results to Ecto Schema.
   """
   def execute(
@@ -86,9 +95,7 @@ defmodule EctoMnesia.Planner do
     {length(result), result}
   end
 
-  @doc """
-  Deletes all records that match Ecto.Query
-  """
+  #  Deletes all records that match Ecto.Query
   def execute(
         _repo,
         %{sources: {{table, _schema, _prefix}}},
@@ -116,9 +123,7 @@ defmodule EctoMnesia.Planner do
     end)
   end
 
-  @doc """
-  Update all records by a Ecto.Query.
-  """
+  #  Update all records by a Ecto.Query.
   def execute(
         _repo,
         %{sources: {{table, _schema, _prefix}}},
@@ -168,10 +173,12 @@ defmodule EctoMnesia.Planner do
     end
   end
 
+  @impl Ecto.Adapter.Queryable
   @doc false
   def stream(_, _, _, _, _),
     do: raise(ArgumentError, "stream/5 is not supported by adapter, use EctoMnesia.Table.Stream.new/2 instead")
 
+  @impl Ecto.Adapter.Schema
   @doc """
   Insert Ecto Schema struct to Mnesia database.
   """
@@ -199,6 +206,7 @@ defmodule EctoMnesia.Planner do
     end
   end
 
+  @impl Ecto.Adapter.Schema
   @doc """
   Insert all
   """
@@ -210,6 +218,7 @@ defmodule EctoMnesia.Planner do
         rows,
         _on_conflict,
         returning,
+        _placeholders,
         _opts
       ) do
     table = Table.get_name(table)
@@ -249,13 +258,14 @@ defmodule EctoMnesia.Planner do
     record = Record.new(schema, table, params)
 
     case Mnesia.transaction(fn ->
-      case Table.insert(table, record) do
-        {:ok, ^record} ->
-          {:ok, params}
-        {:error, reason} ->
-          {:error, reason}
-      end
-    end) do
+           case Table.insert(table, record) do
+             {:ok, ^record} ->
+               {:ok, params}
+
+             {:error, reason} ->
+               {:error, reason}
+           end
+         end) do
       {:atomic, res} -> res
       {:abort, reason} -> {:error, reason}
     end
@@ -267,15 +277,17 @@ defmodule EctoMnesia.Planner do
     record = Record.new(schema, table, params)
 
     case Mnesia.transaction(fn ->
-      case Table.insert(table, record) do
-        {:ok, ^record} ->
-          {:ok, params}
-        {:error, :already_exists} ->
-          {:invalid, [{:unique, pk_field}]}
-        {:error, reason} ->
-          {:error, reason}
-      end
-    end) do
+           case Table.insert(table, record) do
+             {:ok, ^record} ->
+               {:ok, params}
+
+             {:error, :already_exists} ->
+               {:invalid, [{:unique, pk_field}]}
+
+             {:error, reason} ->
+               {:error, reason}
+           end
+         end) do
       {:atomic, res} -> res
       {:abort, reason} -> {:error, reason}
     end
@@ -292,6 +304,7 @@ defmodule EctoMnesia.Planner do
     params
   end
 
+  @impl Ecto.Adapter.Transaction
   @doc """
   Run `fun` inside a Mnesia transaction
   """
@@ -305,16 +318,19 @@ defmodule EctoMnesia.Planner do
     end
   end
 
+  @impl Ecto.Adapter.Transaction
   @doc """
   Returns true when called inside a transaction.
   """
   def in_transaction?(_adapter_meta), do: Mnesia.is_transaction()
 
+  @impl Ecto.Adapter.Transaction
   @doc """
   Transaction rollbacks is not fully supported.
   """
   def rollback(_adapter_meta, _tid), do: Mnesia.abort(:rollback)
 
+  @impl Ecto.Adapter.Schema
   @doc """
   Deletes a record from a Mnesia database.
   """
@@ -327,6 +343,7 @@ defmodule EctoMnesia.Planner do
     end
   end
 
+  @impl Ecto.Adapter.Schema
   @doc """
   Updates record stored in a Mnesia database.
   """
@@ -348,7 +365,9 @@ defmodule EctoMnesia.Planner do
 
       {:ok, _record} ->
         {:ok, changes}
-      error -> error
+
+      error ->
+        error
     end
   end
 
@@ -368,11 +387,13 @@ defmodule EctoMnesia.Planner do
   defp get_limit(%Ecto.Query.QueryExpr{expr: limit}), do: limit
 
   # Required methods for Ecto type casing
-  def loaders({:embed, _value} = primitive, _type), do: [&Ecto.Adapters.SQL.load_embed(primitive, &1)]
+  @impl Ecto.Adapter
+  def loaders({:map, _value}, type), do: [&Ecto.Type.embedded_load(type, &1, :json)]
   def loaders(:binary_id, type), do: [Ecto.UUID, type]
   def loaders(_primitive, type), do: [type]
 
-  def dumpers({:embed, _value} = primitive, _type), do: [&Ecto.Adapters.SQL.dump_embed(primitive, &1)]
+  @impl Ecto.Adapter
+  def dumpers({:map, _value}, type), do: [&Ecto.Type.embedded_dump(type, &1, :json)]
   def dumpers(:binary_id, type), do: [type, Ecto.UUID]
   def dumpers(_primitive, type), do: [type]
 end

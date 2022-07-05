@@ -11,57 +11,36 @@ defmodule EctoMnesia.Mixfile do
       version: @version,
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test],
       docs: [source_ref: "v#\{@version\}", main: "readme", extras: ["README.md"]]
     ]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :mnesia, :confex, :ecto]]
-  end
-
-  # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib"]
-
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # To depend on another app inside the umbrella:
-  #
-  #   {:myapp, in_umbrella: true}
-  #
-  # Type "mix help deps" for more examples and options
-  defp deps do
     [
-      {:confex, "~> 3.3"},
-      {:decimal, "~> 1.5"},
-      {:ecto, "~> 3.0"},
-      {:ex_doc, "~> 0.18", only: [:dev, :test]},
-      {:excoveralls, "~> 0.8", only: [:dev, :test]}
+      extra_applications: [:logger, :mnesia]
     ]
   end
 
-  # Settings for publishing in Hex package manager:
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp deps do
+    [
+      {:decimal, "~> 2.0"},
+      {:ecto_sql, "~> 3.8"},
+      {:ex_doc, "~> 0.28", only: [:dev, :test]}
+    ]
+  end
+
   defp package do
     [
-      contributors: ["Maxim Sokhatsky (5ht)", "Nebo #15"],
-      maintainers: ["Nebo #15"],
+      contributors: ["Maxim Sokhatsky (5ht)", "Nebo #15", "Manuel Rubio"],
+      maintainers: ["Manuel Rubio"],
       licenses: ["MIT"],
-      links: %{github: "https://github.com/Nebo15/ecto_mnesia"},
+      links: %{github: "https://github.com/manuel-rubio/ecto_mnesia"},
       files: ~w(lib LICENSE.md mix.exs README.md)
     ]
   end

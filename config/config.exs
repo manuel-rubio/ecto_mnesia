@@ -1,4 +1,5 @@
-use Mix.Config
+import Config
 
 config :ex_unit, capture_log: true
-# :erlang.system_flag(:backtrace_depth, 1000)
+
+config :mnesia, :dir, 'mnesia'

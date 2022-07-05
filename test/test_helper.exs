@@ -17,22 +17,18 @@ ExUnit.start(
 Application.put_env(:ecto, :primary_key_type, :id)
 
 # Load support files
-Code.require_file("../deps/ecto/integration_test/support/file_helpers.exs", __DIR__)
-Code.require_file("../deps/ecto/integration_test/support/migration.exs", __DIR__)
-Code.require_file("../deps/ecto/integration_test/support/repo.exs", __DIR__)
+Code.require_file("../deps/ecto_sql/integration_test/support/file_helpers.exs", __DIR__)
+Code.require_file("../deps/ecto_sql/integration_test/support/migration.exs", __DIR__)
+Code.require_file("../deps/ecto_sql/integration_test/support/repo.exs", __DIR__)
 Code.require_file("../deps/ecto/integration_test/support/schemas.exs", __DIR__)
 Code.require_file("../deps/ecto/integration_test/support/types.exs", __DIR__)
 
-Application.put_env(:ecto, Ecto.Integration.TestRepo, adapter: EctoMnesia.Adapter)
-
 defmodule Ecto.Integration.TestRepo do
-  use Ecto.Integration.Repo, otp_app: :ecto
+  use Ecto.Integration.Repo, otp_app: :ecto, adapter: EctoMnesia.Adapter
 end
 
-Application.put_env(:ecto, Ecto.Integration.PoolRepo, adapter: EctoMnesia.Adapter)
-
 defmodule Ecto.Integration.PoolRepo do
-  use Ecto.Integration.Repo, otp_app: :ecto
+  use Ecto.Integration.Repo, otp_app: :ecto, adapter: EctoMnesia.Adapter
 
   def create_prefix(prefix) do
     "create schema #{prefix}"

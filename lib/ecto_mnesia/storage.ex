@@ -8,8 +8,8 @@ defmodule EctoMnesia.Storage do
   @behaviour Ecto.Adapter.Storage
 
   @defaults [
-    host: {:system, :atom, "MNESIA_HOST", Kernel.node()},
-    storage_type: {:system, :atom, "MNESIA_STORAGE_TYPE", :disc_copies}
+    host: Kernel.node(),
+    storage_type: :disc_copies
   ]
 
   @doc """
@@ -42,8 +42,8 @@ defmodule EctoMnesia.Storage do
       storage_up(host: `Kernel.node`, storage_type: :disc_copies)
   """
   def storage_up(config) do
-    check_mnesia_dir()
     config = conf(config)
+    check_mnesia_dir()
 
     Logger.info("==> Setting Mnesia schema table copy type")
     Mnesia.change_table_copy_type(:schema, config[:host], config[:storage_type])
@@ -64,27 +64,28 @@ defmodule EctoMnesia.Storage do
   end
 
   @doc """
+  Retrieve the configuration and add default values.
+  """
+  def conf(config) do
+    Keyword.merge(@defaults, config)
+  end
+
+  @doc """
   Temporarily stops Mnesia, deletes schema and then brings it back up again.
   """
   def storage_down(config) do
-    check_mnesia_dir()
     config = conf(config)
+    check_mnesia_dir()
     stop()
     Mnesia.delete_schema([config[:host]])
     start()
   end
 
-  def conf(config \\ []) do
-    Confex.Resolver.resolve!(
-      host: config[:host] || @defaults[:host],
-      storage_type: config[:storage_type] || @defaults[:storage_type]
-    )
-  end
-
   def storage_status(_config) do
     path = List.to_string(:mnesia.system_info(:directory)) <> "/schema.DAT"
+
     case File.exists?(path) do
-      true ->  :up
+      true -> :up
       false -> :down
     end
   end
@@ -110,5 +111,4 @@ defmodule EctoMnesia.Storage do
         Logger.error("Mnesia dir is not character list. Mnesia will not work. ")
     end
   end
-
 end

@@ -19,14 +19,14 @@ defmodule EctoMnesia.Connection do
   end
 
   def terminate(_reason, state) do
-    spawn fn ->
+    spawn(fn ->
       try do
         :dets.sync(@pk_table_name)
         state
       rescue
         e -> e
       end
-    end
+    end)
   end
 
   defp ensure_pk_table!(repo) do
@@ -49,6 +49,7 @@ defmodule EctoMnesia.Connection do
 
   defp do_create_table(repo, table, type, attributes) do
     config = EctoMnesia.Storage.conf(repo.config)
+
     attributes =
       if length(attributes) == 1 do
         attributes ++ [:__hidden]
@@ -71,5 +72,4 @@ defmodule EctoMnesia.Connection do
 
   defp get_engine(nil), do: :ordered_set
   defp get_engine(type) when is_atom(type), do: type
-
 end
