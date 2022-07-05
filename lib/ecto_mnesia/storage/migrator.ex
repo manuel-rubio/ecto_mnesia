@@ -22,7 +22,7 @@ defmodule EctoMnesia.Storage.Migrator do
       |> Enum.uniq()
 
     case do_create_table(adapter_meta, table, type, table_attrs) do
-      :ok -> :ok
+      :ok -> {:ok, []}
       :already_exists -> raise "Table #{table} already exists"
     end
   end
@@ -45,8 +45,8 @@ defmodule EctoMnesia.Storage.Migrator do
       |> Enum.uniq()
 
     case do_create_table(adapter_meta, table, type, new_table_attrs) do
-      :ok -> :ok
-      :already_exists -> :ok
+      :ok -> {:ok, []}
+      :already_exists -> {:ok, []}
     end
   end
 
@@ -70,7 +70,7 @@ defmodule EctoMnesia.Storage.Migrator do
 
     try do
       case Mnesia.transform_table(table, &alter_fn(&1, table_attrs, new_table_attrs), new_table_attrs) do
-        {:atomic, :ok} -> :ok
+        {:atomic, :ok} -> {:ok, []}
         error -> error
       end
     catch
@@ -100,7 +100,7 @@ defmodule EctoMnesia.Storage.Migrator do
 
     try do
       case Mnesia.transform_table(table, &alter_fn(&1, table_attrs, new_table_attrs, renames), new_table_attrs) do
-        {:atomic, :ok} -> :ok
+        {:atomic, :ok} -> {:ok, []}
         error -> error
       end
     catch
@@ -112,7 +112,7 @@ defmodule EctoMnesia.Storage.Migrator do
     table = if String.valid?(table), do: String.to_atom(table), else: table
 
     case Mnesia.delete_table(table) do
-      {:atomic, :ok} -> :ok
+      {:atomic, :ok} -> {:ok, []}
       {:aborted, {:no_exists, _}} -> raise "Table #{table} does not exists"
     end
   end
@@ -121,8 +121,8 @@ defmodule EctoMnesia.Storage.Migrator do
     table = if String.valid?(table), do: String.to_atom(table), else: table
 
     case Mnesia.delete_table(table) do
-      {:atomic, :ok} -> :ok
-      {:aborted, {:no_exists, _}} -> :ok
+      {:atomic, :ok} -> {:ok, []}
+      {:aborted, {:no_exists, _}} -> {:ok, []}
     end
   end
 
@@ -148,9 +148,9 @@ defmodule EctoMnesia.Storage.Migrator do
     |> Enum.uniq()
     |> Enum.map(fn index ->
       case Mnesia.add_table_index(table, index) do
-        {:atomic, :ok} -> :ok
+        {:atomic, :ok} -> {:ok, []}
         {:aborted, {:node_not_running, not_found_node}} -> raise "Node #{inspect(not_found_node)} is not started"
-        {:aborted, {:already_exists, ^table, _}} -> :ok
+        {:aborted, {:already_exists, ^table, _}} -> {:ok, []}
       end
     end)
   end
@@ -162,7 +162,7 @@ defmodule EctoMnesia.Storage.Migrator do
     |> Enum.uniq()
     |> Enum.map(fn index ->
       case Mnesia.del_table_index(table, index) do
-        {:atomic, :ok} -> :ok
+        {:atomic, :ok} -> {:ok, []}
         {:aborted, {:node_not_running, not_found_node}} -> raise "Node #{inspect(not_found_node)} is not started"
         {:aborted, {:no_exists, ^table, _}} -> raise "Index for field #{index} in table #{table} does not exists"
       end
@@ -176,9 +176,9 @@ defmodule EctoMnesia.Storage.Migrator do
     |> Enum.uniq()
     |> Enum.map(fn index ->
       case Mnesia.del_table_index(table, index) do
-        {:atomic, :ok} -> :ok
+        {:atomic, :ok} -> {:ok, []}
         {:aborted, {:node_not_running, not_found_node}} -> raise "Node #{inspect(not_found_node)} is not started"
-        {:aborted, {:no_exists, ^table, _}} -> :ok
+        {:aborted, {:no_exists, ^table, _}} -> {:ok, []}
       end
     end)
   end
